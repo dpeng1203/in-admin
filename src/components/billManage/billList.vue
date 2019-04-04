@@ -134,6 +134,11 @@
                     width="80">
                 </el-table-column>
                 <el-table-column
+                    prop="msg"
+                    label="实际支付金额"
+                    width="100">
+                </el-table-column>
+                <el-table-column
                     prop="mch_charge"
                     label="手续费"
                     width="80">
@@ -603,7 +608,7 @@ export default {
            
     .table
         margin-top: 40px
-        width: 1420px
+        width: 1480px
         .block
             padding: 30px 0
             text-align: center 
