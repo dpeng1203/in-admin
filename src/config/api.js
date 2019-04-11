@@ -116,6 +116,9 @@ export const changeChannelState = p => myPost('/channel/sys',p)
 //改变商户通道
 export const changeMchChannel = p => myPost('/channel/mch',p)
 
+//改变代付通道
+export const changeMchPayChannel = p => myPost('/bank/payment/mch',p)
+
 // 重置密码
 export const resetMchPW = p => myPost('/mch/pwd',p)
 

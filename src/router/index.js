@@ -8,7 +8,7 @@ const merchant = resolve => require(['../components/merManagement/merchant'], re
 const merManage = resolve => require(['../components/merManagement/merManage'], resolve);
 const merDetail = resolve => require(['../components/merManagement/merDetail'], resolve);
 const merRate = resolve => require(['../components/merManagement/merRate'], resolve);
-
+const record = resolve => require(['../components/merManagement/record'], resolve);
 //提现列表
 const cashList = resolve => require(['../components/cashList/cashList'], resolve);
 
@@ -66,7 +66,7 @@ export default new Router({
         {path: 'merManage', name: 'merManage', component: merManage},
         {path: 'merDetail', name: 'merDetail', component: merDetail},
         {path: 'merRate', name: 'merRate', component: merRate},
-
+        {path: 'record', name: 'record', component: record},
         //提现列表
         {path: 'cashList', name: 'cashList', component: cashList},
         //通道管理

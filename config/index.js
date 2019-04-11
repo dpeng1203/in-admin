@@ -12,15 +12,8 @@ module.exports = {
     assetsPublicPath: '/',
     proxyTable: {
       '/api': {
-        // target:'http://47.99.180.135:8080',    //正式环境 
-        // target:'http://47.99.180.135:8088',    //测试环境 
-        // target:'http://172.20.10.6:8080',
-        target:'http://149.28.12.208:8080', 
-        // target:'http://192.168.1.60:8080',       //池服务器
-        // target:'http://172.20.10.6:8080',   //本地
-        // target:'http://172.20.10.6:8080',
-
-        // target:'http://116.62.117.165:9000',
+        // target:'http://47.97.119.14:8080',        //正式环境
+        target:'http://149.28.12.208:8080',
         changeOrigin: true,
         pathRewrite: {
           '^/api': '' // 这里理解成用‘/api’代替target里面的地址，后面组件中我们掉接口时直接用api代替 比如我要调用'http://40.00.100.100:3002/user/add'，直接写‘/api/user/add’即可

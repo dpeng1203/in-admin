@@ -82,11 +82,11 @@
                                             label="商户名称"
                                             width="200">
                                         </el-table-column>
-                                        <el-table-column
+                                        <!-- <el-table-column
                                             prop="money"
                                             label="账户余额"
                                             width="150">
-                                        </el-table-column>
+                                        </el-table-column> -->
                                         <el-table-column
                                             prop="reservoir"
                                             label="代付余额"
@@ -98,10 +98,15 @@
                                             width="150">
                                         </el-table-column>
                                         <el-table-column
+                                            prop="quota"
+                                            label="定额（元）"
+                                            width="150">
+                                        </el-table-column>
+                                        <el-table-column
                                             label="操作"
                                             >
                                             <template slot-scope="scope">
-                                                <el-button @click="handlePay(scope.row)" type="text" size="small">设置费率</el-button>
+                                                <el-button @click="handlePay(scope.row)" type="text" size="small">更新</el-button>
                                             </template>
                                         </el-table-column>
                                     </el-table>
@@ -207,6 +212,20 @@
                 </el-tabs>
             </div>
         </div>
+        <el-dialog title="更新代付信息" :visible.sync="dialogFormVisible">
+            <el-form :model="form">
+                <el-form-item label="费率(%)：" :label-width="formLabelWidth">
+                    <el-input v-model="form.rate" auto-complete="off" style="width: 220px"></el-input>
+                </el-form-item>
+                <el-form-item label="定额(元)：" :label-width="formLabelWidth">
+                    <el-input v-model="form.quota" auto-complete="off" style="width: 220px"></el-input>
+                </el-form-item>
+            </el-form>
+            <div slot="footer" class="dialog-footer">
+                <el-button @click="dialogFormVisible = false">取 消</el-button>
+                <el-button type="primary" @click="changeHandlePay">确 定</el-button>
+            </div>
+        </el-dialog>
     </div>
 </template>
 
@@ -232,6 +251,13 @@ export default {
             },
             total: null,
             tableData: [],
+            dialogFormVisible: false,
+            formLabelWidth: '120px',
+            form: {
+                mch_id: '',
+                rate: '',
+                quota: ''
+            }
         }
     },
     components: {
@@ -271,33 +297,58 @@ export default {
                     if(ele.rate) {
                         ele.rate = ele.rate/100
                     }
+                    if(ele.quota) {
+                        ele.quota = ele.quota/100
+                    }else{
+                        ele.quota = 2
+                    }
                 })
             })
         },
         //设置商户代付费率
         handlePay(row) {
-            this.$prompt('请输入商户代付费率(%)', '提示', {
-                confirmButtonText: '确定',
-                cancelButtonText: '取消',
-            }).then(({ value }) => {
-                let data = {
-                    mch_id: row.mch_id,
-                    rate: value * 100
-                }
-                payRate(data).then( res => {
-                    this.getPayRate()
-                    this.$message({
-                        type: 'success',
-                        message: '设置成功！！'
-                    });
-                })
+            this.dialogFormVisible = true
+            this.form.rate = row.rate
+            this.form.quota = row.quota
+            this.form.mch_id = row.mch_id
+            // this.$prompt('请输入商户代付费率(%)', '提示', {
+            //     confirmButtonText: '确定',
+            //     cancelButtonText: '取消',
+            // }).then(({ value }) => {
+            //     let data = {
+            //         mch_id: row.mch_id,
+            //         rate: value * 100
+            //     }
+            //     payRate(data).then( res => {
+            //         this.getPayRate()
+            //         this.$message({
+            //             type: 'success',
+            //             message: '设置成功！！'
+            //         });
+            //     })
                 
-            }).catch(() => {
+            // }).catch(() => {
+            //     this.$message({
+            //         type: 'info',
+            //         message: '已取消'
+            //     });       
+            // });
+        },
+        //确定商户费率
+        changeHandlePay() {
+            let data = {
+                mch_id: this.form.mch_id,
+                rate: this.form.rate*100,
+                quota: this.form.quota*100 
+            }
+            payRate(data).then( res => {
+                this.getPayRate()
+                this.dialogFormVisible = false
                 this.$message({
-                    type: 'info',
-                    message: '已取消'
-                });       
-            });
+                    type: 'success',
+                    message: '设置成功！！'
+                });
+            })
         },
         //获得提现列表
         getList() {

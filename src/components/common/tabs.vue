@@ -32,6 +32,10 @@
                 <span slot="title">代付交易</span>
             </el-menu-item>
         </el-submenu>
+        <el-menu-item index="/home/record" v-if="root != 2">
+            <i class="el-icon-tickets"></i>
+            <span slot="title">充值记录</span>
+        </el-menu-item>
         <el-menu-item index="/home/sysApp" v-if="root != 2">
             <i class="el-icon-picture-outline"></i>
             <span slot="title">产品管理</span>
@@ -59,7 +63,7 @@
 
         <el-submenu index="5" v-if="root != 2">
             <template slot="title">
-                <i class="el-icon-goods"></i>
+                <i class="el-icon-sort"></i>
                 <span>通道管理</span>
             </template>
             <el-menu-item index="/home/channel">
@@ -85,11 +89,11 @@
             </el-menu-item>
         </el-submenu> -->
         <el-menu-item index="/home/zfbhb">
-            <i class="el-icon-menu"></i>
+            <i class="el-icon-news"></i>
             <span slot="title">支付宝H5</span>
         </el-menu-item>
         <el-menu-item index="/home/zfbToBank">
-            <i class="el-icon-printer"></i>
+            <i class="el-icon-d-arrow-right"></i>
             <span slot="title">支付宝转银行卡</span>
         </el-menu-item>
     </el-menu>

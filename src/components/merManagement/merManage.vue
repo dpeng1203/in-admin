@@ -92,22 +92,45 @@
                     width="100">
                 </el-table-column>
                 <el-table-column
-                    prop="channel_name"
-                    label="通道"
+                    label="充值通道"
                     show-overflow-tooltip
-                    width="130">
+                    width="180">
+                    <template slot-scope="scope">
+                        <el-select v-model="scope.row.channel_id" placeholder="请选择" class="inline-input" @change="sureChannel(scope.row)">
+                            <el-option
+                            v-for="item in channelList"
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item.id">
+                            </el-option>
+                        </el-select>
+                    </template>
+                </el-table-column>
+                <el-table-column
+                    label="代付通道"
+                    show-overflow-tooltip
+                    width="180">
+                    <template slot-scope="scope">
+                        <el-select v-model="scope.row.bank_id" placeholder="请选择" class="inline-input" @change="surePayChannel(scope.row)">
+                            <el-option
+                            v-for="item in bankList"
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item.id">
+                            </el-option>
+                        </el-select>
+                    </template>
                 </el-table-column>
                 <el-table-column
                 label="操作"
                 >
                 <template slot-scope="scope">
                     <el-button @click="handleClick(scope.row)" type="text" size="mini">详情</el-button>
-                    <el-button @click="handleClickCutChannel(scope.row)" type="text" size="mini">切换通道</el-button>
                     <el-button @click="handleClickVecharge(scope.row)" type="text" size="mini">代付充值</el-button>
                     <el-button @click="handleTable(scope.row)" type="text" size="mini">充值记录</el-button>
-                    <!-- <el-button @click="handleClickCutState(scope.row)" type="text" size="mini">{{scope.row.mch_state == '激活' ? '冻结' : '激活'}}</el-button> -->
                 </template>
                 </el-table-column>
+
             </el-table>
             <div class="block">
                 <el-pagination
@@ -121,19 +144,6 @@
                 </el-pagination>
             </div>
         </div>
-        <el-dialog title="切换通道" :visible.sync="dialogFormVisible">
-            <el-form :model="form">
-                <el-form-item label="通道名称" :label-width="formLabelWidth">
-                    <el-select v-model="form.region" placeholder="请选择">
-                        <el-option  v-for="item in channelList" :key="item.id" :value="item.id" :label="item.name"></el-option>
-                    </el-select>
-                </el-form-item>
-            </el-form>
-            <div slot="footer" class="dialog-footer">
-                <el-button @click="dialogFormVisible = false">取 消</el-button>
-                <el-button type="primary" @click="sureChangeChannel">确 定</el-button>
-            </div>
-        </el-dialog>
         <el-dialog
             title="提示"
             :visible.sync="dialogVisible"
@@ -188,7 +198,7 @@
 
 <script>
 import formatDate from '../../config/formatData'
-import { merList,cutMchState,channelList,changeMchChannel,resetMchPW,recharge,payRate,rechargeList } from '../../config/api'
+import { merList,cutMchState,channelList,payBankList,changeMchChannel,changeMchPayChannel,resetMchPW,recharge,payRate,rechargeList } from '../../config/api'
 export default {
     name: 'accountManage',
     data() {
@@ -247,6 +257,7 @@ export default {
             },
             formLabelWidth: '120px' ,
             channelList: [] ,
+            bankList: [],
             mch_id: '',
             row: {}
         }
@@ -282,6 +293,10 @@ export default {
                         ele.audit_state = '审核失败'
                     }
                 })
+                if(this.channelList.length === 0 || this.bankList.length === 0) {
+                    this.getChannelList()
+                    this.getPayList()
+                }
             })
         },
         // 通道列表
@@ -292,29 +307,38 @@ export default {
             }
             channelList(data).then((res) => {
                 this.channelList = res.data.data_list
-                this.channelList = this.channelList.filter( ele => {
-                    return ele.state 
-                })
+                // this.channelList = this.channelList.filter( ele => {
+                //     return ele.state 
+                // })
             })
         },
-        //切换通道
-        handleClickCutChannel(row) {
-            this.dialogFormVisible = true
-            this.getChannelList()
-            this.mch_id = row.mch_id
-        },
-        //选择通道
-        sureChangeChannel() {
-            this.dialogFormVisible = false
-            if(this.form.region != '') {
-                let data = {
-                    mch_id: this.mch_id,
-                    channel_id: this.form.region
-                }
-                changeMchChannel(data).then( res => {
-                    this.getList()
-                })
+        getPayList() {
+            let data = {
+                offset: 0,
+                limit: 10000
             }
+            payBankList(data).then((res) => {
+                this.bankList = res.data.data_list
+            })
+        },
+        sureChannel(row) {
+            let data = {
+                mch_id: row.mch_id,
+                channel_id: row.channel_id
+            }
+            changeMchChannel(data).then( res => {
+                this.getList()
+            })
+        },
+        surePayChannel(row) {
+            console.log(row)
+            let data = {
+                mch_id: row.mch_id,
+                bank_id: row.bank_id
+            }
+            changeMchPayChannel(data).then( res => {
+                this.getList()
+            })
         },
         // 切换商户状态
         handleClickCutState(row) {
@@ -422,30 +446,6 @@ export default {
         handleClick(row) {
             this.$router.push({path: '/home/merDetail',query: {mch: row}})
         },
-        //设置商户代付费率
-        handleClickPayRate(row) {
-            this.$prompt('请输入商户代付费率(%)', '提示', {
-                confirmButtonText: '确定',
-                cancelButtonText: '取消',
-            }).then(({ value }) => {
-                let data = {
-                    mch_id: row.mch_id,
-                    rate: value * 100
-                }
-                payRate(data).then( res => {
-                    this.$message({
-                        type: 'success',
-                        message: '设置成功！！'
-                    });
-                })
-                
-            }).catch(() => {
-                this.$message({
-                    type: 'info',
-                    message: '已取消'
-                });       
-            });
-        },
         handleSizeChange(val) {
             console.log(`每页 ${val} 条`);
             this.data.limit = val
@@ -500,7 +500,7 @@ export default {
             margin-left: 0
     .table
         margin-top: 40px
-        width: 1300px
+        width: 1350px
         .block
             padding: 30px 0
             text-align: center 
